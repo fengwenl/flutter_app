@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:app_iphone/Model/get_data.dart';
 import 'package:app_iphone/Model/testjson.dart';
+import 'package:app_iphone/Model/json_entity.dart';
 void main() {
   runApp(new MyApp());
 }
@@ -16,6 +17,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context){
     return new MaterialApp(
+
       home: new ScaffoldRoute(),
     );
   }
@@ -45,15 +47,11 @@ class _ScaffoldRouteState extends State<ScaffoldRoute>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar( //导航栏
-        //title: Text(""),
-//        actions: <Widget>[ //导航栏右侧菜单
-//          IconButton(icon: Icon(Icons.share), onPressed: () {}),
-//        ],
+
         leading:Builder(builder: (context){
           return IconButton(
             icon: Icon(Icons.dashboard, color: Colors.white),
             onPressed: () {
-              // 打开抽屉菜单
               Scaffold.of(context).openDrawer();
             },
           );
@@ -64,7 +62,6 @@ class _ScaffoldRouteState extends State<ScaffoldRoute>
         ),//生产tab栏
 
       ),
-
       drawer: new MyDrawer(), //抽屉
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
@@ -109,15 +106,6 @@ class _ScaffoldRouteState extends State<ScaffoldRoute>
           );
         }).toList(),
       ),
-//      body: SafeArea(
-//        bottom: false,
-//        child: TabBarView(
-//          children: [
-//            NewRoute(),
-//          ],
-//        ),
-//      ),
-
 
     );
   }
@@ -143,11 +131,70 @@ class _ScaffoldRouteState extends State<ScaffoldRoute>
 
 class NewRoute1 extends StatelessWidget {
   @override
+//  Widget build(BuildContext context) {
+//    return new douban_Movie();
+//  }
   Widget build(BuildContext context) {
-    return new Randomimg();
+    return new douban_Movie();
   }
 }
 
+//电影
+
+class douban_Movie extends StatefulWidget {
+
+  @override
+  createState() => new get_Movie();
+}
+
+class get_Movie extends State<douban_Movie>{
+  var movie_data = null;
+  void get_http_movie() async{
+    print('xxx');
+     String url = "https://douban-api.uieee.com/v2/movie/in_theaters?city=广州&start=0&count=10";
+     print(url);
+    Response response = await Dio().get(url);
+    if(response.statusCode == 200){
+      setState(() {
+        print(response.data);
+        movie_data = JsonEntity.fromJson(response.data);
+        print('xxxxxxx21231');
+        print(movie_data);
+      });
+    }
+  }
+  @override
+  void initState() {
+    print('1');
+    super.initState();
+    get_http_movie();
+  }
+  Widget _buildRow(int index) {
+    print('3');
+    return Padding(
+      padding: EdgeInsets.all(20.0),
+      child: ListTile(
+        title: Text(movie_data.subjects[index].title),
+        leading: CircleAvatar(
+          backgroundImage: NetworkImage(movie_data.subjects[index].images.small),
+        ),
+      ),
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: movie_data == null
+          ? Center(child: CircularProgressIndicator())
+          : ListView.separated(
+        itemCount: movie_data.subjects.length,
+        itemBuilder: (BuildContext context, int index) => _buildRow(index),
+        //子项的分割线
+        separatorBuilder: (BuildContext context,int index) => Divider(),
+      ),
+    );
+  }
+}
 //
 class Randomimg extends StatefulWidget {
   @override
@@ -157,11 +204,9 @@ class Randomimg extends StatefulWidget {
 class RandomimgState extends State<Randomimg> {
 //List<Null> _json = [];
  var _json = null;
-  //初始化状态
- //this.getHttp()
   void getHttp() async {
     print('2');
-    Response response = await Dio().get("https://bird.ioliu.cn/v1/?url=https://api.douban.com/v2/music/search?q=%E6%9D%8E%E5%AE%97%E7%9B%9B&start=0&count=5");
+    Response response = await Dio().get("https://douban.uieee.com/v2/music/search?q=%E6%9D%8E%E5%AE%97%E7%9B%9B&start=0&count=5");
     print(response);
     if(response.statusCode == 200){
       // print(response.data);
@@ -176,6 +221,7 @@ class RandomimgState extends State<Randomimg> {
  @override
  void initState() {
    print('1');
+   print(this);
    super.initState();
    // this.getHttp();
    getHttp();
@@ -213,12 +259,8 @@ class RandomimgState extends State<Randomimg> {
 
 class NewRoute2 extends StatelessWidget {
   @override
-
   Widget build(BuildContext context) {
-    return new Scaffold(
-
-
-    );
+    return new Randomimg();
   }
 }
 
